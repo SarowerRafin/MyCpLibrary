@@ -1,0 +1,115 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define endl "\n";
+typedef long long ll;
+typedef vector<int> vi;
+
+const int N = 1e5 + 10;
+struct trieNode
+{
+    int wordcount, children;
+    char c;
+    trieNode *next[26];
+    trieNode(char x)
+    {
+        for (int i = 0; i < 26; i++)
+            next[i] = NULL;
+        children = 0;
+        wordcount = 0;
+        c = x;
+    }
+};
+class Trie
+{
+public:
+    trieNode *root = new trieNode('*');
+
+    void insert(string &s)
+    {
+        trieNode *temp = root;
+        for (int i = 0; i < s.size(); i++)
+        {
+            int id = s[i] - 'a';
+            if (temp->next[id] == NULL)
+            {
+                temp->next[id] = new trieNode(s[i]);
+                temp->children++;
+            }
+            temp = temp->next[id];
+        }
+        temp->wordcount++;
+    }
+
+    bool search(string &s)
+    {
+        trieNode *temp = root;
+        for (int i = 0; i < s.size(); i++)
+        {
+            int id = s[i] - 'a';
+            if (temp->next[id] == NULL)
+                return false;
+            temp = temp->next[id];
+        }
+        return temp->wordcount;
+    }
+
+    void del(trieNode *curr)
+    {
+        for (int i = 0; i < 26; i++)
+            if (curr->next[i])
+                del(curr->next[i]);
+        delete (curr);
+    }
+} mytrie;
+
+void solve()
+{
+    int n, q;
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        string s;
+        cin >> s;
+        mytrie.insert(s);
+    }
+    cin >> q;
+    // cout << mytrie.root->children << endl;
+    while (q--)
+    {
+        string s;
+        cin >> s;
+        if (mytrie.search(s))
+            cout << "YES\n";
+        else
+            cout << "NO\n";
+    }
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    int t = 1, cs = 1;
+    // cin >> t;
+    while (t--)
+    {
+        // cout<<"Case "<<cs++<<": ";
+        solve();
+    }
+    return 0;
+}
+
+// input set for the problems is like that , n numbers of string, and q numbers of query
+// find out that the string in the query is present or not here
+// 5
+// rafin
+// sarower
+// jahan
+// mridula
+// sumaiya
+// 5
+// rafin
+// rafshan
+// mridula
+// sumaiyaa
+// sarowe
