@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int strLen = 1e5 + 9;
+
+int modpow(long long a, long long n, const int m)
+{
+    int r = 1 % m;
+    a %= m;
+    if (n < 0)
+        a += m;
+    while (n)
+    {
+        if (n & 1)
+            r = (long long)r * a % m;
+        a = (long long)a * a % m;
+        n >>= 1;
+    }
+    return r;
+}
+
+const int MOD1 = 127657753, MOD2 = 987654319;
+const int p1 = 137, p2 = 277;
+int ip1, ip2;
+pair<int, int> pw[strLen], ipw[strLen];
+void prec()
+{
+    pw[0] = {1, 1};
+    ip1 = modpow(p1, MOD1 - 2, MOD1);
+    ip2 = modpow(p2, MOD2 - 2, MOD2);
+    ipw[0] = {1, 1};
+    for (int i = 1; i < strLen; i++)
+    {
+        pw[i].first = 1LL * pw[i - 1].first * p1 % MOD1;
+        pw[i].second = 1LL * pw[i - 1].second * p2 % MOD2;
+        ipw[i].first = 1LL * ipw[i - 1].first * ip1 % MOD1;
+        ipw[i].second = 1LL * ipw[i - 1].second * ip2 % MOD2;
+    }
+}
+struct Hashing
+{
+    int n;
+    string s;
+    vector<pair<int, int>> hs;
+    Hashing() {}
+    Hashing(string _s)
+    {
+        n = _s.size();
+        s = _s;
+        hs.emplace_back(0, 0);
+        for (int i = 0; i < n; i++)
+        {
+            pair<int, int> p;
+            p.first = (hs[i].first + 1LL * pw[i].first * s[i] % MOD1) % MOD1;
+            p.second = (hs[i].second + 1LL * pw[i].second * s[i] % MOD2) % MOD2;
+            hs.push_back(p);
+            // hs.emplace_back(p);
+            // for i=0, it would be count for index 1, as {0,0} is already emplaced back;
+        }
+    }
+    pair<int, int> get_hash(int l, int r)
+    {
+        // make it 1-based indexing ,
+        l++, r++;
+        assert(1 <= l && l <= r && r <= n);
+        pair<int, int> ans;
+        ans.first = (hs[r].first - hs[l - 1].first + MOD1) * 1LL * ipw[l - 1].first % MOD1;
+        ans.second = (hs[r].second - hs[l - 1].second + MOD2) * 1LL * ipw[l - 1].second % MOD2;
+        return ans;
+    }
+    pair<int, int> get_hash()
+    {
+        return get_hash(0, n - 1);
+    }
+};
+
+int main()
+{
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    prec();
+    int n;
+    cin >> n;
+    string s1, s2;
+    cin >> s1 >> s2;
+    Hashing hs1 = Hashing(s1);
+    Hashing hs2 = Hashing(s2);
+    auto a = hs1.get_hash();
+    auto b = hs2.get_hash();
+    cout << a.first << ' ' << a.second << endl;
+    cout << b.first << ' ' << b.second << endl;
+    return 0;
+}
