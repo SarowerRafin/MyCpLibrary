@@ -1,0 +1,157 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define endl "\n";
+typedef long long ll;
+typedef vector<int> vi;
+const int N = 4;
+
+int getid(char &c)
+{
+    if (c == 'A')
+        return 0;
+    if (c == 'C')
+        return 1;
+    if (c == 'G')
+        return 2;
+    if (c == 'T')
+        return 3;
+}
+
+struct trieNode
+{
+    int wordcount, children, number; // how many times this character path has been followed;
+    char c;
+    trieNode *next[N];
+    trieNode(char x)
+    {
+        for (int i = 0; i < N; i++)
+            next[i] = NULL;
+        children = 0;
+        wordcount = 0;
+        number = 0;
+        c = x;
+    }
+};
+
+class Trie
+{
+public:
+    trieNode *root = new trieNode('*');
+
+    void insert(string &s)
+    {
+        trieNode *temp = root;
+        for (int i = 0; i < s.size(); i++)
+        {
+            int id = getid(s[i]);
+            if (temp->next[id] == NULL)
+            {
+                temp->next[id] = new trieNode(s[i]);
+                temp->children++;
+            }
+            temp->next[id]->number++;
+            temp = temp->next[id];
+        }
+        temp->wordcount++;
+    }
+
+    bool search(string &s)
+    {
+        trieNode *temp = root;
+        for (int i = 0; i < s.size(); i++)
+        {
+            // int id = s[i] - 'A';
+            int id = getid(s[i]);
+            if (temp->next[id] == NULL)
+                return false;
+            temp = temp->next[id];
+        }
+        return temp->wordcount;
+    }
+
+    trieNode *findNode(string &s)
+    {
+        trieNode *temp = root;
+        for (int i = 0; i < s.size(); i++)
+        {
+            // int id = s[i] - 'A';
+            int id = getid(s[i]);
+
+            if (temp->next[id] == NULL)
+                return NULL;
+            temp = temp->next[id];
+        }
+        return temp;
+    }
+
+    void del(trieNode *curr)
+    {
+        for (int i = 0; i < N; i++)
+            if (curr->next[i])
+                del(curr->next[i]);
+        delete (curr);
+    }
+};
+
+ll ans = 0;
+
+void dfs(trieNode *curr, int len)
+{
+    if (curr == NULL)
+        return;
+
+    for (int i = 0; i < N; i++)
+    {
+        trieNode *temp = curr->next[i];
+        if (temp != NULL)
+        {
+            ans = max(ans, 1LL * temp->number * (len + 1));
+            dfs(temp, len + 1);
+        }
+    }
+}
+
+void solve()
+{
+    ans = 0;
+    Trie mytrie;
+    int n, q;
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        string s;
+        cin >> s;
+        mytrie.insert(s);
+    }
+    dfs(mytrie.root, 0);
+    cout << ans << endl;
+    mytrie.del(mytrie.root);
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    int t = 1, cs = 1;
+    cin >> t;
+    while (t--)
+    {
+        cout << "Case " << cs++ << ": ";
+        solve();
+    }
+    return 0;
+}
+
+// 3
+// 4
+// ACGT
+// ACGTGCGT
+// ACCGTGC
+// ACGCCGT
+// 3
+// CGCGCGCGCGCGCCCCGCCCGCGC
+// CGCGCGCGCGCGCCCCGCCCGCAC
+// CGCGCGCGCGCGCCCCGCCCGCTC
+// 2
+// CGCGCCGCGCGCGCGCGCGC
+// GGCGCCGCGCGCGCGCGCTC
